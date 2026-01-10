@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puzzle Lógico P / I</title>
+
+  <!-- CSS (por ahora mínimo) -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ========================= -->
+  <!-- PANTALLA 1: INICIO -->
+  <!-- ========================= -->
+  <section id="screen-start" class="screen active">
+    <h1>Puzzle Lógico</h1>
+
+    <p>Nivel actual: <span id="current-level">1</span></p>
+    <p>Puntaje total: <span id="total-score">0</span></p>
+
+    <button id="btn-start">Jugar</button>
+  </section>
+
+  <!-- ========================= -->
+  <!-- PANTALLA 2: TRANSICIÓN / NIVEL -->
+  <!-- ========================= -->
+  <section id="screen-transition" class="screen">
+    <h2>Nivel <span id="transition-level">1</span></h2>
+    <p>Progreso: <span id="level-progress">0</span></p>
+
+    <button id="btn-continue">Continuar</button>
+  </section>
+
+  <!-- ========================= -->
+  <!-- PANTALLA 3: PUZZLE -->
+  <!-- ========================= -->
+  <section id="screen-puzzle" class="screen">
+
+    <!-- INFO SUPERIOR -->
+    <div id="puzzle-info">
+      <span>Tiempo: <span id="timer">0</span>s</span>
+      <span>Errores: <span id="errors">0</span></span>
+      <span>Puntos: <span id="puzzle-score">0</span></span>
+    </div>
+
+    <!-- TABLA DEL PUZZLE -->
+    <div id="puzzle-board">
+      <!-- La cuadrícula se genera por JavaScript -->
+    </div>
+
+    <!-- SELECTOR -->
+    <div id="selector">
+      <button data-value="P">P</button>
+      <button data-value="I">I</button>
+    </div>
+
+  </section>
+
+  <!-- ========================= -->
+  <!-- PANTALLA 4: RESULTADO -->
+  <!-- ========================= -->
+  <section id="screen-result" class="screen">
+    <h2>Puzzle resuelto</h2>
+    <p>Puntos obtenidos: <span id="result-score">0</span></p>
+
+    <button id="btn-next">Siguiente</button>
+  </section>
+
+  <!-- ========================= -->
+  <!-- PANTALLA 5: VIDA / ENERGÍA -->
+  <!-- ========================= -->
+  <section id="screen-life" class="screen">
+    <h2>¿Continuar?</h2>
+
+    <button id="btn-wait">Esperar</button>
+    <button id="btn-ad-life">Ver anuncio</button>
+    <!-- AQUÍ SE DISPARA UN ANUNCIO RECOMPENSADO -->
+  </section>
+
+  <!-- ========================= -->
+  <!-- CONTENEDOR DE ANUNCIOS -->
+  <!-- ========================= -->
+  <div id="ad-container" style="display:none;">
+    <!-- 
+      AQUÍ PEGAS EL CÓDIGO REAL DEL ANUNCIO
+      (AdMob, etc.) CUANDO LO TENGAS
+    -->
+  </div>
+
+  <!-- ========================= -->
+  <!-- JAVASCRIPT -->
+  <!-- ========================= -->
+  <script src="game.js"></script>
+
+</body>
+</html>
