@@ -5,93 +5,181 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Puzzle Lógico P / I</title>
 
-  <!-- CSS (por ahora mínimo) -->
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ========================= -->
-  <!-- PANTALLA 1: INICIO -->
-  <!-- ========================= -->
-  <section id="screen-start" class="screen active">
+<div id="app">
+
+  <!-- HEADER -->
+  <header>
     <h1>Puzzle Lógico</h1>
+    <div class="level">Nivel 1</div>
+  </header>
 
-    <p>Nivel actual: <span id="current-level">1</span></p>
-    <p>Puntaje total: <span id="total-score">0</span></p>
-
-    <button id="btn-start">Jugar</button>
-  </section>
-
-  <!-- ========================= -->
-  <!-- PANTALLA 2: TRANSICIÓN / NIVEL -->
-  <!-- ========================= -->
-  <section id="screen-transition" class="screen">
-    <h2>Nivel <span id="transition-level">1</span></h2>
-    <p>Progreso: <span id="level-progress">0</span></p>
-
-    <button id="btn-continue">Continuar</button>
-  </section>
-
-  <!-- ========================= -->
-  <!-- PANTALLA 3: PUZZLE -->
-  <!-- ========================= -->
-  <section id="screen-puzzle" class="screen">
-
-    <!-- INFO SUPERIOR -->
-    <div id="puzzle-info">
-      <span>Tiempo: <span id="timer">0</span>s</span>
-      <span>Errores: <span id="errors">0</span></span>
-      <span>Puntos: <span id="puzzle-score">0</span></span>
-    </div>
-
-    <!-- TABLA DEL PUZZLE -->
-    <div id="puzzle-board">
-      <!-- La cuadrícula se genera por JavaScript -->
-    </div>
-
-    <!-- SELECTOR -->
-    <div id="selector">
-      <button data-value="P">P</button>
-      <button data-value="I">I</button>
-    </div>
-
-  </section>
-
-  <!-- ========================= -->
-  <!-- PANTALLA 4: RESULTADO -->
-  <!-- ========================= -->
-  <section id="screen-result" class="screen">
-    <h2>Puzzle resuelto</h2>
-    <p>Puntos obtenidos: <span id="result-score">0</span></p>
-
-    <button id="btn-next">Siguiente</button>
-  </section>
-
-  <!-- ========================= -->
-  <!-- PANTALLA 5: VIDA / ENERGÍA -->
-  <!-- ========================= -->
-  <section id="screen-life" class="screen">
-    <h2>¿Continuar?</h2>
-
-    <button id="btn-wait">Esperar</button>
-    <button id="btn-ad-life">Ver anuncio</button>
-    <!-- AQUÍ SE DISPARA UN ANUNCIO RECOMPENSADO -->
-  </section>
-
-  <!-- ========================= -->
-  <!-- CONTENEDOR DE ANUNCIOS -->
-  <!-- ========================= -->
-  <div id="ad-container" style="display:none;">
-    <!-- 
-      AQUÍ PEGAS EL CÓDIGO REAL DEL ANUNCIO
-      (AdMob, etc.) CUANDO LO TENGAS
-    -->
+  <!-- INFO -->
+  <div class="info-bar">
+    <div class="info-box">⏱ <span id="time">30</span>s</div>
+    <div class="info-box">⭐ <span id="score">0</span></div>
   </div>
 
-  <!-- ========================= -->
-  <!-- JAVASCRIPT -->
-  <!-- ========================= -->
-  <script src="game.js"></script>
+  <!-- PUZZLE -->
+  <div id="puzzle" class="puzzle"></div>
+
+  <!-- ACCIONES -->
+  <div class="actions">
+    <button class="secondary" onclick="newPuzzle()">Reiniciar</button>
+    <button class="primary" onclick="check()">Comprobar</button>
+  </div>
+
+  <!-- MENSAJE -->
+  <div class="message" id="message"></div>
+
+  <!-- ZONA DE ANUNCIO -->
+  <div class="ad-zone">
+    Zona reservada para anuncios
+  </div>
+
+</div>
+
+<!-- MOTOR -->
+<script src="game.js"></script>
+
+<script>
+/* ===============================
+   CONEXIÓN UI ↔ MOTOR
+================================ */
+
+let currentPuzzle;
+let timer;
+let timeLeft = GameEngine.state.timeLimit;
+
+/* ===============================
+   INICIAR PUZZLE
+================================ */
+
+function newPuzzle() {
+  currentPuzzle = GameEngine.newPuzzle();
+  renderPuzzle();
+  resetTimer();
+  document.getElementById("message").textContent = "";
+}
+
+/* ===============================
+   RENDER PUZZLE
+================================ */
+
+function renderPuzzle() {
+  const container = document.getElementById("puzzle");
+  container.innerHTML = "";
+
+  // Celda vacía superior izquierda
+  container.appendChild(cell("", "empty"));
+
+  // Headers fila
+  currentPuzzle.headersRow.forEach(h => {
+    container.appendChild(cell(h, "header"));
+  });
+
+  // Filas
+  currentPuzzle.headersCol.forEach((h, r) => {
+    container.appendChild(cell(h, "header"));
+
+    currentPuzzle.playerGrid[r].forEach((val, c) => {
+      if (val === null) {
+        container.appendChild(inputCell(r, c));
+      } else {
+        container.appendChild(cell(val));
+      }
+    });
+  });
+}
+
+/* ===============================
+   CELDAS
+================================ */
+
+function cell(text, type = "") {
+  const div = document.createElement("div");
+  div.className = "cell " + type;
+  div.textContent = text;
+  return div;
+}
+
+function inputCell(r, c) {
+  const div = document.createElement("div");
+  div.className = "cell";
+
+  const btn = document.createElement("button");
+  btn.textContent = "?";
+
+  btn.onclick = () => {
+    btn.textContent = btn.textContent === "P" ? "I" : "P";
+  };
+
+  btn.dataset.r = r;
+  btn.dataset.c = c;
+
+  div.appendChild(btn);
+  return div;
+}
+
+/* ===============================
+   COMPROBAR SOLUCIÓN
+================================ */
+
+function check() {
+  const inputs = document.querySelectorAll(".cell button");
+
+  const grid = JSON.parse(JSON.stringify(currentPuzzle.playerGrid));
+
+  inputs.forEach(btn => {
+    const r = btn.dataset.r;
+    const c = btn.dataset.c;
+    grid[r][c] = btn.textContent;
+  });
+
+  const ok = GameEngine.checkSolution(currentPuzzle, grid);
+
+  document.getElementById("score").textContent = GameEngine.state.score;
+  document.getElementById("message").textContent = ok
+    ? "✅ Correcto"
+    : "❌ Intenta de nuevo";
+
+  if (ok) {
+    newPuzzle();
+  }
+}
+
+/* ===============================
+   TEMPORIZADOR
+================================ */
+
+function resetTimer() {
+  clearInterval(timer);
+  timeLeft = GameEngine.state.timeLimit;
+  document.getElementById("time").textContent = timeLeft;
+
+  timer = setInterval(() => {
+    timeLeft--;
+    document.getElementById("time").textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      document.getElementById("message").textContent =
+        "⏰ Tiempo terminado. Se reinicia el puzzle.";
+      newPuzzle();
+    }
+  }, 1000);
+}
+
+/* ===============================
+   INICIO
+================================ */
+
+newPuzzle();
+</script>
 
 </body>
 </html>
